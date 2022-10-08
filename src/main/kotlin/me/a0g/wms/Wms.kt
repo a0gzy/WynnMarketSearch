@@ -23,10 +23,11 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import okhttp3.OkHttpClient
-import okhttp3.Request
+//import okhttp3.OkHttpClient
+//import okhttp3.Request
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import java.net.URL
 
 @Mod(
     modid = Wms.MODID,
@@ -43,7 +44,7 @@ object Wms {
     val logger: Logger = LogManager.getLogger()
 
     val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    val okHttpClient = OkHttpClient()
+    //val okHttpClient = OkHttpClient()
     val jsonParser = JsonParser()
     private val mutex: Mutex = Mutex()
 
@@ -54,7 +55,8 @@ object Wms {
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
         scope.launch {
-            getWynnItems()
+            //getWynnItems()
+            getData()
         }.invokeOnCompletion {
             if (it == null)
                 logger.info("WynnData here")
@@ -72,13 +74,20 @@ object Wms {
         EssentialAPI.getCommandRegistry().registerCommand(WmsCommand())
     }
 
-    suspend fun getWynnItems(){
+    /*suspend fun getWynnItems(){
         mutex.withLock(wynnData) {
             wynnData= jsonParser.parse(getWithAgent("https://api.wynncraft.com/public_api.php?action=itemDB&category=all")).asJsonObject
         }
+    }*/
+
+    suspend fun getData(){
+        val text = URL("https://api.wynncraft.com/public_api.php?action=itemDB&category=all").readText()
+        mutex.withLock(wynnData) {
+            wynnData = jsonParser.parse(text).asJsonObject
+        }
     }
 
-    fun getWithAgent(url: String): String {
+    /*fun getWithAgent(url: String): String {
         val request = Request.Builder()
             .url(url)
             .header("User-Agent", "Mozilla/4.76 (SK1ER LEVEL HEAD V${VERSION})")
@@ -98,7 +107,7 @@ object Wms {
         }
 
         return itemNamesList
-    }
+    }*/
 
     fun getItems():MutableList<WynnItem>{
         val items: JsonArray =wynnData.get("items").asJsonArray

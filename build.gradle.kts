@@ -8,7 +8,7 @@ plugins {
 
 val modGroup: String by project
 val modBaseName: String by project
-val modVersion: String = "1.0.0"
+val modVersion: String = "0.0.2"
 group = modGroup
 base.archivesName.set("$modBaseName (${platform.mcVersionStr})")
 //base.archivesName.set("$modBaseName-$modVersion (${platform.mcVersionStr})")
@@ -38,7 +38,8 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.20")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
     embed("gg.essential:loader-launchwrapper:1.1.3")
-    compileOnly("com.squareup.okhttp3:okhttp:3.14.9")
+//    embed("com.squareup.okhttp3:okhttp:3.14.9")
+//    compileOnly("com.squareup.okhttp3:okhttp:3.14.9")
 
    // compileOnly("org.spongepowered:mixin:0.8.5-SNAPSHOT")
 }

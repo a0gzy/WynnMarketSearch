@@ -23,11 +23,14 @@ class WmsCommand: Command("wms") {
     fun handleRefresh() {
         Wms.scope.launch {
             launch {
-                Wms.getWynnItems()
+                Wms.getData()
+               // Wms.getWynnItems()
             }
         }.invokeOnCompletion {
-            if (it == null)
+            if (it == null){
                 EssentialAPI.getMinecraftUtil().sendMessage("${ChatColor.GREEN}Refreshed!")
+                Wms.logger.info(Wms.wynnData)
+            }
             else
                 EssentialAPI.getMinecraftUtil().sendMessage("${ChatColor.RED}Refresh failed!")
         }
