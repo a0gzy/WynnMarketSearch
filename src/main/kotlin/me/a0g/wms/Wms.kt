@@ -41,7 +41,7 @@ import java.net.URL
 )
 object Wms {
     const val MODID = "wms"
-    const val VERSION = "0.0.4"
+    const val VERSION = "0.0.5"
     const val NAME = "WynnMarketSearch"
 
     val logger: Logger = LogManager.getLogger()
@@ -74,9 +74,21 @@ object Wms {
     @Mod.EventHandler
     fun postInit(ignored: FMLPostInitializationEvent) {
 
+        val updater = UpdateChecker()
+        scope.launch {
+            updater.getLastVersion()
+        }.invokeOnCompletion {
+            if (it == null) {
+                logger.info("updater started")
+                logger.info(updater.updateBody)
+            }
+            else
+                logger.info("updater start failed")
+        }
+
         arrayOf(
             this,
-            UpdateChecker()
+            updater
         ).forEach(MinecraftForge.EVENT_BUS::register)
 
         EssentialAPI.getCommandRegistry().registerCommand(WmsCommand())

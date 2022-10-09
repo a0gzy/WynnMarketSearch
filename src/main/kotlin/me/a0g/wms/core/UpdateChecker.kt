@@ -14,17 +14,25 @@ class UpdateChecker {
     var isUpdatedForPush = false
     var updateBody = ""
 
-    suspend fun getLastVersion(){
+    fun getLastVersion(){
+        Wms.logger.info("getLastVersion")
         val text = URL("https://api.github.com/repos/a0gzy/WynnMarketSearch/releases/latest").readText()
         val gitData = Wms.jsonParser.parse(text).asJsonObject
         val newVersion = gitData["tag_name"].asString
-        for(i in 0 until 2){
-            val versionSplit = Wms.VERSION.split(".")
-            val newVersionSplit = newVersion.split(".")
 
+        val versionSplit = Wms.VERSION.split(".")
+        val newVersionSplit = newVersion.split(".")
+        Wms.logger.info(versionSplit)
+        Wms.logger.info(newVersionSplit)
+
+        for(i in 0 until 3){
+            Wms.logger.info(i)
             if(newVersionSplit[i].toInt() > versionSplit[i].toInt()){
-                isUpdatedForPush = true
-                updateBody = gitData["body"].asString
+                this.isUpdatedForPush = true
+                this.updateBody = gitData["body"].asString
+                Wms.logger.info("new update")
+
+                return
             }
         }
 
@@ -33,12 +41,14 @@ class UpdateChecker {
     @SubscribeEvent
     fun onGuiOpen(e: GuiScreenEvent.DrawScreenEvent.Post) {
         if (e.gui is GuiMainMenu) {
-            if (isUpdatedForPush) {
-                EssentialAPI.getNotifications().pushWithAction(
-                    "New WynnMarketSearch version",
-                    updateBody
+            if (this.isUpdatedForPush) {
+                Wms.logger.info("Wms update founded")
+                EssentialAPI.getNotifications().pushWithDurationAndAction(
+                    title = "New WynnMarketSearch version",
+                    message = this.updateBody,
+                    duration = 15f
                 ) { openGitSite() }
-                isUpdatedForPush = false
+                this.isUpdatedForPush = false
             }
         }
     }
