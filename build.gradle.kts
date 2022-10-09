@@ -10,7 +10,7 @@ plugins {
 val modGroup: String by project
 //val modBaseName: String by project
 val modBaseName: String = "WynnMarketSearch"
-val modVersion: String = "0.0.3"
+val modVersion: String = "0.0.4"
 version = modVersion
 group = modGroup
 base.archivesName.set("$modBaseName")

@@ -55,6 +55,10 @@ class SearchGui : WindowScreen(ElementaVersion.V2) {
 
         searchTextContainer.onMouseClick { searchText.grabWindowFocus() }
 
+        if(Wms.config.autoFocus) {
+            searchText.grabWindowFocus()
+        }
+
         for(i in 0 until 7){
             itemList.add(ItemContainer(null))
         }

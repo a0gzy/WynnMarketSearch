@@ -41,7 +41,7 @@ import java.net.URL
 )
 object Wms {
     const val MODID = "wms"
-    const val VERSION = "0.0.3"
+    const val VERSION = "0.0.4"
     const val NAME = "WynnMarketSearch"
 
     val logger: Logger = LogManager.getLogger()

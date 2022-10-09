@@ -15,6 +15,14 @@ object Config : Vigilant(File("./config/Wms.toml")){
     )
     var marketSearch = true
 
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Auto focus",
+        description = "Automaticly focus the search field.",
+        category = "Main"
+    )
+    var autoFocus = true
+
     init {
         initialize()
     }
