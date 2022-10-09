@@ -13,9 +13,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import me.a0g.wms.commands.WmsCommand
 import me.a0g.wms.core.Config
+import me.a0g.wms.core.UpdateChecker
 import me.a0g.wms.core.WynnItem
 import me.a0g.wms.gui.SearchGui
+import net.minecraft.client.gui.GuiMainMenu
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
@@ -38,7 +41,7 @@ import java.net.URL
 )
 object Wms {
     const val MODID = "wms"
-    const val VERSION = "0.0.1"
+    const val VERSION = "0.0.3"
     const val NAME = "WynnMarketSearch"
 
     val logger: Logger = LogManager.getLogger()
@@ -70,15 +73,22 @@ object Wms {
 
     @Mod.EventHandler
     fun postInit(ignored: FMLPostInitializationEvent) {
-        MinecraftForge.EVENT_BUS.register(this)
+
+        arrayOf(
+            this,
+            UpdateChecker()
+        ).forEach(MinecraftForge.EVENT_BUS::register)
+
         EssentialAPI.getCommandRegistry().registerCommand(WmsCommand())
     }
 
-    /*suspend fun getWynnItems(){
-        mutex.withLock(wynnData) {
-            wynnData= jsonParser.parse(getWithAgent("https://api.wynncraft.com/public_api.php?action=itemDB&category=all")).asJsonObject
+    @SubscribeEvent
+    fun onChatMessage(event: ClientChatReceivedEvent){
+        if(event.message.formattedText.contains("Type the item name or type 'cancel' to cancel:") && config.marketSearch){
+            EssentialAPI.getGuiUtil().openScreen(SearchGui())
         }
-    }*/
+    }
+
 
     suspend fun getData(){
         val text = URL("https://api.wynncraft.com/public_api.php?action=itemDB&category=all").readText()
@@ -86,28 +96,6 @@ object Wms {
             wynnData = jsonParser.parse(text).asJsonObject
         }
     }
-
-    /*fun getWithAgent(url: String): String {
-        val request = Request.Builder()
-            .url(url)
-            .header("User-Agent", "Mozilla/4.76 (SK1ER LEVEL HEAD V${VERSION})")
-            .get()
-            .build()
-        return kotlin.runCatching {
-            okHttpClient.newCall(request).execute().body()?.use { it.string() }!!
-        }.getOrDefault("{\"success\":false,\"cause\":\"API_DOWN\"}")
-    }
-
-    fun getItemNames(): MutableList<String> {
-        val items: JsonArray =wynnData.get("items").asJsonArray
-        val itemNamesList = mutableListOf<String>()
-
-        for(item in items) {
-            itemNamesList.add(item.asJsonObject.get("name").asString)
-        }
-
-        return itemNamesList
-    }*/
 
     fun getItems():MutableList<WynnItem>{
         val items: JsonArray =wynnData.get("items").asJsonArray
@@ -120,11 +108,22 @@ object Wms {
         return wynnItems
     }
 
-    @SubscribeEvent
-    fun onChatMessage(event: ClientChatReceivedEvent){
-        if(event.message.formattedText.contains("Type the item name or type 'cancel' to cancel:")){
-            EssentialAPI.getGuiUtil().openScreen(SearchGui())
+
+    fun check(itemName: String,text:String): Boolean{
+        val rItemName = itemName.replace("-".toRegex()," ")
+        val splitText = text.replace("-".toRegex()," ").split(" ")
+        var rText:String = ""
+        for(split in splitText){
+            rText += "($split)*"
         }
+        if(rItemName.contains(rText.toRegex()))
+            return true
+
+        //Item - Morph-Topaz | text - topaz morph
+        //morph topaz | topaz morph
+        /*if(rItemName.contains(rText.toRegex()))
+            return true*/
+        return false
     }
 
     //var item = WynnItem(wynnData.get("items").asJsonArray.get(0).asJsonObject)

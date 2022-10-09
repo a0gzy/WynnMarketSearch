@@ -6,7 +6,7 @@ plugins {
 }
 
 //version = "1.8.5"
-version = versionFromBuildIdAndBranch()
+//version = versionFromBuildIdAndBranch()
 
 preprocess {
     val forge11202 = createNode("1.12.2-forge", 11202, "mcp")

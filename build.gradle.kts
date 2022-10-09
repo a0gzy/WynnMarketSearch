@@ -1,4 +1,5 @@
 import gg.essential.gradle.util.noServerRunConfigs
+import gg.essential.gradle.util.versionFromBuildIdAndBranch
 
 plugins {
     kotlin("jvm")
@@ -7,10 +8,12 @@ plugins {
 }
 
 val modGroup: String by project
-val modBaseName: String by project
-val modVersion: String = "0.0.2"
+//val modBaseName: String by project
+val modBaseName: String = "WynnMarketSearch"
+val modVersion: String = "0.0.3"
+version = modVersion
 group = modGroup
-base.archivesName.set("$modBaseName (${platform.mcVersionStr})")
+base.archivesName.set("$modBaseName")
 //base.archivesName.set("$modBaseName-$modVersion (${platform.mcVersionStr})")
 
 loom {

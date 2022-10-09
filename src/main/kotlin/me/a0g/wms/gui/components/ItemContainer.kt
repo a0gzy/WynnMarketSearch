@@ -37,6 +37,14 @@ class ItemContainer(var item: WynnItem?) : UIContainer() {
 
     fun setWynnItem(wynnItem: WynnItem?){
         itemStack.item = wynnItem
+
+    }
+
+    fun setWynn(wynnItem: WynnItem?){
+        this.item = wynnItem
+        itemStack.item = this.item
+        text.setText(if(this.item != null) this.item!!.getTextToRender() else "")
+        //this.item?.let { text.setText(it.getTextToRender()) }
     }
 
     /*fun setItem(item: WynnItem?){

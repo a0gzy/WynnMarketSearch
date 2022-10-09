@@ -16,6 +16,7 @@ import me.a0g.wms.Wms
 import me.a0g.wms.core.WynnItem
 import me.a0g.wms.gui.components.ItemContainer
 import net.minecraft.client.Minecraft
+import org.lwjgl.input.Keyboard
 import java.awt.Color
 
 class SearchGui : WindowScreen(ElementaVersion.V2) {
@@ -29,6 +30,7 @@ class SearchGui : WindowScreen(ElementaVersion.V2) {
     private var itemList = mutableListOf<ItemContainer>()
 
     init {
+
         container.constrain {
             x = CenterConstraint()
             y = CenterConstraint()
@@ -60,69 +62,51 @@ class SearchGui : WindowScreen(ElementaVersion.V2) {
         searchText.onKeyType { typedChar, keyCode ->
 
             for(i in 0 until 7){
-                itemList[i].setText("")
-                itemList[i].setWynnItem(null)
+                itemList[i].setWynn(null)
+                //itemList[i].setText("")
+               // itemList[i].setWynnItem(null)
             }
 
-            val items = Wms.getItems()
             val text = searchText.getText().lowercase()
+            if(keyCode == Keyboard.KEY_RETURN){
+                if(text.isNotEmpty())
+                    sendToChat(text)
+            }
+
+
+
+            val items = Wms.getItems()
             val correctItems =  mutableListOf<WynnItem>()
+
 
             if(text.isNotEmpty()) {
                 for(item in items) {
-                    if(item.name.lowercase().contains(text)){
+                    val itemName = item.name.lowercase()
+                    val splitItemName = itemName.replace("-".toRegex()," ").split(" ".toRegex())
+                    val splitText = itemName.replace("-".toRegex()," ").split(" ".toRegex())
+
+                    if(itemName.contains(text) || itemName.replace("-".toRegex()," ").contains(text) ){
                         correctItems.add(item)
                     }
-//                    if(item.name.lowercase().startsWith(text)) {
-//                        correctItems.add(item)
-//                    }
+                    /*if(Wms.check(itemName,text)){
+                        correctItems.add(item)
+                    }*/
+
                 }
+
                 /*try {
                     Wms.logger.info(correctItems[0].name)
                 }catch(e: Exception) {e.printStackTrace()}*/
 
                 for(i in itemList.indices){
-                    //itemList[i].item =
-                    /*if(correctItems.size == 1){
-                        itemList[0].item = correctItems[0]
-                    }
-                    else if(correctItems.isNotEmpty() && i < correctItems.size && correctItems[i] != null)
-                        itemList[i].item = correctItems[i]*/
                     if(correctItems.isNotEmpty() && i < correctItems.size && correctItems[i] != null){
-                       // itemList[i].item = correctItems[i]
-                        itemList[i].setWynnItem(correctItems[i])
-                        itemList[i].setText(correctItems[i].name)
+                        itemList[i].setWynn(correctItems[i])
+                        //itemList[i].setWynnItem(correctItems[i])
+                        //itemList[i].setText(correctItems[i].name)
                     }
 
                 }
             }
-
-            /*for(i in 0 until 7){
-                itemList[i].setText("")
-            }
-
-            val names = Wms.getItemNames()
-            val correctNames =  mutableListOf<String>()
-            val text = searchText.getText().lowercase()
-
-            if(text.isNotEmpty()) {
-                for(name in names) {
-                    if(name.lowercase().startsWith(text)) {
-                        correctNames.add(name)
-                    }
-                }
-                Wms.logger.info(correctNames)
-                for(i in 0 until 7){
-                    //itemList[i].item =
-                    if(correctNames.size == 1){
-                        itemList[0].setText(correctNames[0])
-                    }
-                    else if(correctNames.isNotEmpty() && correctNames[i].isNotEmpty())
-                        itemList[i].setText(correctNames[i])
-                }
-            }*/
-
-
 
         }
 
@@ -159,7 +143,8 @@ class SearchGui : WindowScreen(ElementaVersion.V2) {
                             withContext(Dispatchers.IO) {
                                 Thread.sleep(100)
                             }
-                            Minecraft.getMinecraft().player.sendChatMessage(itemList[i].getText())
+                            Minecraft.getMinecraft().player.sendChatMessage(itemList[i].item!!.getNameToChat())
+                           // Minecraft.getMinecraft().player.sendChatMessage(itemList[i].getText())
                            // Wms.getWynnItems()
                         }
                     }
@@ -169,6 +154,20 @@ class SearchGui : WindowScreen(ElementaVersion.V2) {
             }
         }
 
+    }
+
+    fun sendToChat(text: String){
+        toCancel = false
+        Minecraft.getMinecraft().player.closeScreen()
+
+        Wms.scope.launch {
+            launch {
+                withContext(Dispatchers.IO) {
+                    Thread.sleep(100)
+                }
+                Minecraft.getMinecraft().player.sendChatMessage(text)
+            }
+        }
     }
 
 

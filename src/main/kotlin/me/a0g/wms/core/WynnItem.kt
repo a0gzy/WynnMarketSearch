@@ -1,6 +1,7 @@
 package me.a0g.wms.core
 
 import com.google.gson.JsonObject
+import gg.essential.universal.ChatColor
 import me.a0g.wms.Wms
 import net.minecraft.client.Minecraft
 import net.minecraft.item.Item
@@ -14,6 +15,38 @@ class WynnItem(var json: JsonObject) {
 //    var armorType = json.get("armorType").asString//["armorType"].asString
 //    var material = json.get("material").asString//["material"].asString
 
+    fun getTier():String{
+        val tier:String? = if(json.has("tier") && !json.get("tier").isJsonNull) json.get("tier").asString.lowercase() else null
+        var color:String = ""
+        when(tier) {
+            "normal" -> color = ChatColor.GRAY.toString()
+            "unique" -> color = ChatColor.YELLOW.toString()
+            "rare" -> color = ChatColor.LIGHT_PURPLE.toString()
+            "legendary" -> color = ChatColor.AQUA.toString()
+            "fabled" -> color = ChatColor.RED.toString()
+            "mythic" -> color = ChatColor.DARK_PURPLE.toString()
+            "set" -> color = ChatColor.GREEN.toString()
+        }
+
+        return color
+    }
+
+    fun getNameToChat():String{
+        val name = this.name
+        if(name.isNullOrEmpty())
+            return ""
+
+        return name
+    }
+
+    fun getTextToRender():String{
+        val color = getTier()
+        val text = name;
+        if(text.isNullOrEmpty()) return ""
+
+        return "$color$text"
+    }
+
     fun getItemToRender():ItemStack? {
        // Wms.logger.info(json)
         val type:String? = if(json.has("type") && !json.get("type").isJsonNull) json.get("type").asString else null
@@ -25,19 +58,6 @@ class WynnItem(var json: JsonObject) {
             if(type != null && armorType != null){
                 val item =  Item.getByNameOrId("minecraft:${armorType.lowercase().replace("chain".toRegex(),"chainmail")}_${type.lowercase()}")
                 itemStack = item?.let { ItemStack(it) }
-                /*when(type.lowercase()) {
-                    "chestplate" -> when(armorType.lowercase()) {
-                        "diamond" -> id = 311
-                        "golden" -> id = 315
-                        "iron" -> id = 307
-                        "chain" ->
-                        "leather" ->
-
-                    }
-                    "leggings" -> when(armorType) {
-
-                    }
-                }*/
             }
         }
         else{
@@ -54,15 +74,10 @@ class WynnItem(var json: JsonObject) {
                 tag.setBoolean("Unbreakable",true)
                 iStack.tagCompound = tag
                 iStack.itemDamage = metadata
-                //iStack.set
-                //iStack.metadata.plus(metadata)
                 itemStack = iStack
-                //Wms.logger.info(iStack.metadata. + " | " + metadata)
             }
-            //item.set
-            //item = Item.getItemById(material.replace(":.+".toRegex(),"").toInt())
         }
-        //var item = Item.getItemById(2)
+
         if(itemStack != null)
             return itemStack
 
