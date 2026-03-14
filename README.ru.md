@@ -90,6 +90,6 @@ cd WynnMarketSearch
 
 ## Ссылки
 
-- [Исходный код](https://github.com/a0g/WynnMarketSearch)
+- [Исходный код](https://github.com/a0gzy/WynnMarketSearch)
 - [Wynncraft API](https://api.wynncraft.com/v3/item/database?fullResult)
-- [Отчёт об ошибке](https://github.com/a0g/WynnMarketSearch/issues)
+- [Отчёт об ошибке](https://github.com/a0gzy/WynnMarketSearch/issues)
