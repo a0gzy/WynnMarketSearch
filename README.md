@@ -90,6 +90,6 @@ The compiled `.jar` file will be in `build/libs/`.
 
 ## Links
 
-- [Source Code](https://github.com/a0g/WynnMarketSearch)
+- [Source Code](https://github.com/a0gzy/WynnMarketSearch)
 - [Wynncraft API](https://api.wynncraft.com/v3/item/database?fullResult)
-- [Report a Bug](https://github.com/a0g/WynnMarketSearch/issues)
+- [Report a Bug](https://github.com/a0gzy/WynnMarketSearch/issues)
