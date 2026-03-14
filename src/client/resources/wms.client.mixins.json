@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "me.a0g.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ChatHudMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

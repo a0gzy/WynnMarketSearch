@@ -1,0 +1,42 @@
+{
+	"schemaVersion": 1,
+	"id": "wms",
+	"version": "${version}",
+	"name": "WynnMarketSearch",
+	"description": "Search items from Wynncraft API in market chat",
+	"authors": [
+		"a0g"
+	],
+	"contact": {
+		"sources": "https://github.com/a0g/WynnMarketSearch"
+	},
+	"license": "MIT",
+	"icon": "assets/wms/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": [
+			"me.a0g.Wms"
+		],
+		"client": [
+			"me.a0g.WmsClient"
+		],
+		"modmenu": [
+			"me.a0g.config.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"wms.mixins.json",
+		{
+			"config": "wms.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config2": "*",
+		"modmenu": "*"
+	}
+}
