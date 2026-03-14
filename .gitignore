@@ -56,7 +56,6 @@ mod.md
 apiData.json
 
 # screenshots
-*.png
 *.jpg
 *.jpeg
 *.gif
