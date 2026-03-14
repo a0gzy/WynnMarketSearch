@@ -2,7 +2,7 @@
 
 **Wynncraft mod with enhanced market search**
 
-![WynnMarketSearch GUI](https://i.imgur.com/mFpB1HQ.png)
+![WynnMarketSearch GUI](https://i.imgur.com/1muxM4V.png)
 
 ## Description
 

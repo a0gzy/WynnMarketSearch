@@ -2,7 +2,7 @@
 
 **Мод для Wynncraft с улучшенным поиском на рынке**
 
-![WynnMarketSearch GUI](https://i.imgur.com/mFpB1HQ.png)
+![WynnMarketSearch GUI](https://i.imgur.com/1muxM4V.png)
 
 ## Описание
 
