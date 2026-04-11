@@ -24,6 +24,8 @@ bin/
 .classpath
 .project
 
+.env
+
 # macos
 
 *.DS_Store

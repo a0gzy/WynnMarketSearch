@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.concurrent.CompletableFuture;
+
 @Mixin(ChatHud.class)
 public class ChatHudMixin {
     @Inject(method = "addMessage(Lnet/minecraft/text/Text;)V", at = @At("HEAD"))
@@ -21,16 +23,34 @@ public class ChatHudMixin {
         }
 
         String content = message.getString();
+        
+        // Проверяем, что GUI ещё не открыт
+        if (MinecraftClient.getInstance().currentScreen instanceof SearchGuiScreen) {
+            return;
+        }
 
-        if (content.contains("Type the item name") || content.contains("'cancel' to cancel")) {
-            Wms.LOGGER.info("Market search message detected in ChatHud!");
-
-            MinecraftClient client = MinecraftClient.getInstance();
-            client.execute(() -> {
-                if (WmsClient.getWynnApi() != null) {
-                    SearchGuiScreen screen = new SearchGuiScreen(WmsClient.getWynnApi());
-                    client.setScreen(screen);
+        //Type the item name or type 'cancel' to cancel:
+        if (content.contains("Type the item name or type 'cancel' to cancel:")) {
+            // Задержка 300мс чтобы чат успел закрыться
+            CompletableFuture.runAsync(() -> {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
+                
+                MinecraftClient client = MinecraftClient.getInstance();
+                client.execute(() -> {
+                    // Повторная проверка после задержки
+                    if (client.currentScreen instanceof SearchGuiScreen) {
+                        return;
+                    }
+                    
+                    if (WmsClient.getWynnApi() != null) {
+                        SearchGuiScreen screen = new SearchGuiScreen(WmsClient.getWynnApi());
+                        client.setScreen(screen);
+                    }
+                });
             });
         }
     }
