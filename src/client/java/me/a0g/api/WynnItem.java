@@ -14,14 +14,20 @@ public class WynnItem {
     private final String tier;
     private final String rarity;
     private final JsonObject icon;
+    private final boolean isCustom;
 
     public WynnItem(String name, JsonObject json) {
+        this(name, json, false);
+    }
+
+    public WynnItem(String name, JsonObject json, boolean isCustom) {
         this.name = name;
         this.internalName = json.has("internalName") ? json.get("internalName").getAsString() : name;
         this.type = json.has("type") ? json.get("type").getAsString() : null;
         this.tier = json.has("tier") ? json.get("tier").getAsString() : null;
         this.rarity = json.has("rarity") ? json.get("rarity").getAsString() : null;
         this.icon = json.has("icon") ? json.getAsJsonObject("icon") : null;
+        this.isCustom = isCustom;
     }
 
     public String getName() {
@@ -48,10 +54,19 @@ public class WynnItem {
         return icon;
     }
 
+    public boolean isCustom() {
+        return isCustom;
+    }
+
     /**
      * Получение цвета форматирования на основе редкости предмета
      */
     public Formatting getRarityColor() {
+        // Кастомные предметы — золотой
+        if (isCustom) {
+            return Formatting.GOLD;
+        }
+
         // Сначала проверяем rarity (для обычных предметов)
         if (rarity != null) {
             return switch (rarity.toLowerCase()) {
@@ -126,7 +141,8 @@ public class WynnItem {
         if (name == null || name.isEmpty()) {
             return Text.literal("");
         }
-        return Text.literal(name).formatted(getRarityColor());
+        String displayName = isCustom ? "§7[Custom] §6" + name : name;
+        return Text.literal(displayName).formatted(isCustom ? Formatting.GOLD : getRarityColor());
     }
 
     /**

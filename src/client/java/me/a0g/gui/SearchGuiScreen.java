@@ -49,8 +49,13 @@ public class SearchGuiScreen extends Screen {
     private CompletableFuture<Void> searchFuture;
 
     public SearchGuiScreen(WynnApi api) {
+        this(api, true);
+    }
+
+    public SearchGuiScreen(WynnApi api, boolean shouldCancel) {
         super(Text.literal("WynnMarketSearch"));
         this.api = api;
+        this.shouldCancel = shouldCancel;
     }
 
     @Override

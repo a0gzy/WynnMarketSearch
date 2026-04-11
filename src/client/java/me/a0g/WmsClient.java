@@ -1,6 +1,7 @@
 package me.a0g;
 
 import me.a0g.api.WynnApi;
+import me.a0g.command.WmsCommand;
 import me.a0g.config.ModConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
@@ -21,6 +22,9 @@ public class WmsClient implements ClientModInitializer {
 
         // Инициализация API
         wynnApi = new WynnApi();
+
+        // Регистрация клиентских команд
+        WmsCommand.register();
 
         // Загрузка данных в фоне
         wynnApi.loadDataAsync().thenRun(() -> {
