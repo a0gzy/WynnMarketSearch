@@ -56,6 +56,17 @@ mod.md
 
 # api data (локальные данные с апи)
 apiData.json
+newAPI.json
+
+# claude code локальное
+.claude/
+
+# env / секреты
+.env.local
+.env.*.local
+
+# wiki / референсы
+wiki/
 
 # screenshots
 img/

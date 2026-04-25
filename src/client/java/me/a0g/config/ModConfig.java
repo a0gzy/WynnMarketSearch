@@ -20,6 +20,10 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.Gui.TransitiveObject
     public boolean autoFocus = true;
 
+    @Comment("URL of the WynnMarketSearch item-database backend (override to self-host)")
+    @ConfigEntry.Gui.Tooltip
+    public String apiUrl = "https://wms-site-api.vercel.app/api/items";
+
     public static ModConfig get() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig();
     }

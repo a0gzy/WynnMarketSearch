@@ -177,21 +177,21 @@ public class CustomItemManager {
         }
 
         String iconId = customItems.get(name);
-
-        // Создаём JSON для иконки
-        JsonObject iconJson = new JsonObject();
-        iconJson.addProperty("format", "legacy");
-        JsonObject value = new JsonObject();
-        // Пустая строка или null = барьер
         String itemId = (iconId == null || iconId.isEmpty()) ? "minecraft:barrier" : iconId;
+
+        JsonObject value = new JsonObject();
         value.addProperty("id", itemId);
+
+        JsonObject iconJson = new JsonObject();
+        iconJson.addProperty("format", "attribute");
         iconJson.add("value", value);
 
         JsonObject itemJson = new JsonObject();
-        itemJson.addProperty("internalName", "custom_" + name.replace(" ", "_"));
+        itemJson.addProperty("displayName", name);
+        itemJson.addProperty("tier", "normal");
         itemJson.add("icon", iconJson);
 
-        return new WynnItem(name, itemJson, true);
+        return new WynnItem(itemJson, true);
     }
 
     /**

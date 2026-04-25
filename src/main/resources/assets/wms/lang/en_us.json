@@ -3,5 +3,7 @@
   "text.autoconfig.wms.option.marketSearch.@Tooltip": "Open search GUI when market chat message appears",
   "text.autoconfig.wms.option.autoFocus": "Auto-focus Search Box",
   "text.autoconfig.wms.option.autoFocus.@Tooltip": "Automatically focus search box when GUI opens",
+  "text.autoconfig.wms.option.apiUrl": "Item Database API URL",
+  "text.autoconfig.wms.option.apiUrl.@Tooltip": "Backend that serves the slim Wynncraft item database. Override to self-host.",
   "text.autoconfig.wms.title": "WynnMarketSearch Config"
 }
