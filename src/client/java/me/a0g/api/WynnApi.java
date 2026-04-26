@@ -37,12 +37,18 @@ public class WynnApi {
     private JsonObject cachedData;
     private List<WynnItem> cachedItems;
     private final CustomItemManager customItemManager;
+    private final FavoritesManager favoritesManager;
+    private final HistoryManager historyManager;
+    private final PinnedSlotsManager pinnedSlotsManager;
     private boolean isLoading = false;
     private boolean isLoaded = false;
 
     public WynnApi() {
         this.configDir = MinecraftClient.getInstance().runDirectory.toPath().resolve("wms");
         this.customItemManager = new CustomItemManager();
+        this.favoritesManager = new FavoritesManager();
+        this.historyManager = new HistoryManager();
+        this.pinnedSlotsManager = new PinnedSlotsManager();
     }
 
     public CompletableFuture<Void> loadDataAsync() {
@@ -175,10 +181,21 @@ public class WynnApi {
     public CompletableFuture<Void> forceReloadFromApi() {
         return CompletableFuture.runAsync(() -> {
             isLoaded = false;
-            isLoading = false;
             cachedData = null;
             cachedItems = null;
-            loadDataAsync().join();
+            isLoading = true;
+            try {
+                // Принципиально пропускаем isCacheValid() — иначе reload бессмысленен.
+                if (loadFromApi()) return;
+                // Только если API недоступно — поднимаем устаревший локальный кэш.
+                if (loadFromCache()) {
+                    Wms.LOGGER.warn("Force reload: API unavailable, fell back to stale cache ({} items)", cachedItems.size());
+                } else {
+                    Wms.LOGGER.error("Force reload failed: API unavailable and no cache on disk");
+                }
+            } finally {
+                isLoading = false;
+            }
         });
     }
 
@@ -204,29 +221,55 @@ public class WynnApi {
     }
 
     public List<WynnItem> searchItems(String query) {
-        List<WynnItem> results = new ArrayList<>();
+        // Сначала отдельным проходом собираем все совпавшие избранные — чтобы они
+        // гарантированно попали в результат и не были срезаны лимитом.
+        List<WynnItem> favs = new ArrayList<>();
+        List<WynnItem> rest = new ArrayList<>();
 
         if (isLoaded && cachedItems != null) {
             for (WynnItem item : cachedItems) {
-                if (item.matchesSearch(query)) {
-                    results.add(item);
-                    if (results.size() >= 14) {
-                        return results;
-                    }
+                if (!item.matchesSearch(query)) continue;
+                if (favoritesManager.isFavorite(item.getName())) {
+                    favs.add(item);
+                } else {
+                    rest.add(item);
                 }
             }
         }
 
         for (WynnItem customItem : customItemManager.getAllCustomItems()) {
-            if (customItem.matchesSearch(query)) {
-                results.add(customItem);
-                if (results.size() >= 14) {
-                    return results;
-                }
+            if (!customItem.matchesSearch(query)) continue;
+            if (favoritesManager.isFavorite(customItem.getName())) {
+                favs.add(customItem);
+            } else {
+                rest.add(customItem);
             }
         }
 
+        List<WynnItem> results = new ArrayList<>(favs);
+        for (WynnItem r : rest) {
+            if (results.size() >= 14) break;
+            results.add(r);
+        }
         return results;
+    }
+
+    /**
+     * Ищет предмет по точному {@code displayName}. Сначала смотрит в API-кеше,
+     * потом в пользовательских предметах. Используется для рендера иконок в
+     * списке истории, где у нас на руках только строка-имя.
+     */
+    public WynnItem findByName(String displayName) {
+        if (displayName == null || displayName.isEmpty()) return null;
+        if (cachedItems != null) {
+            for (WynnItem item : cachedItems) {
+                if (displayName.equals(item.getName())) return item;
+            }
+        }
+        for (WynnItem custom : customItemManager.getAllCustomItems()) {
+            if (displayName.equals(custom.getName())) return custom;
+        }
+        return null;
     }
 
     public List<WynnItem> getAllItems() {
@@ -246,5 +289,17 @@ public class WynnApi {
 
     public CustomItemManager getCustomItemManager() {
         return customItemManager;
+    }
+
+    public FavoritesManager getFavoritesManager() {
+        return favoritesManager;
+    }
+
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
+
+    public PinnedSlotsManager getPinnedSlotsManager() {
+        return pinnedSlotsManager;
     }
 }

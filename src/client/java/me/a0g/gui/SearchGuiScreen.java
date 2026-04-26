@@ -4,8 +4,11 @@ import me.a0g.Wms;
 import me.a0g.api.WynnApi;
 import me.a0g.api.WynnItem;
 import me.a0g.config.ModConfig;
+import me.a0g.gui.widgets.InstructionsWidget;
 import me.a0g.gui.widgets.ItemButtonWidget;
+import me.a0g.gui.widgets.PinnedSlotsWidget;
 import me.a0g.gui.widgets.SearchInputWidget;
+import me.a0g.gui.widgets.SortPanelWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
@@ -15,6 +18,7 @@ import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -24,10 +28,21 @@ import java.util.concurrent.CompletableFuture;
 public class SearchGuiScreen extends Screen {
     // Базовые размеры (при targetScaleFactor = 2.0)
     private static final int BASE_WIDTH = 400;
-    private static final int BASE_HEIGHT = 280;
+    private static final int BASE_HEIGHT = 283;
     private static final int BASE_ITEM_HEIGHT = 36;
     private static final int BASE_SEARCH_HEIGHT = 20;
     private static final int MAX_VISIBLE_ITEMS = 7;
+
+    // Боковая панель сортировки справа
+    private static final int BASE_SORT_PANEL_WIDTH = 80;
+    private static final int BASE_PANEL_GAP = 4;
+    private static final int BASE_TOTAL_WIDTH = BASE_WIDTH + BASE_PANEL_GAP + BASE_SORT_PANEL_WIDTH;
+
+    // Нижняя полоса закреплённых предметов — привязана к низу экрана,
+    // независимо от позиции основной панели.
+    private static final int BASE_PINNED_WIDTH = 218; // 9×22 + 8×1 gap + 12 padding
+    private static final int BASE_PINNED_HEIGHT = 57;
+    private static final int BASE_PINNED_BOTTOM_MARGIN = 8;
 
     // Целевой scale factor для фиксированного визуального размера
     private static final double TARGET_SCALE_FACTOR = 2.0;
@@ -42,6 +57,9 @@ public class SearchGuiScreen extends Screen {
 
     // Виджеты
     private SearchInputWidget searchBox;
+    private SortPanelWidget sortPanel;
+    private PinnedSlotsWidget pinnedSlots;
+    private InstructionsWidget instructions;
     private final List<ItemButtonWidget> itemButtons = new ArrayList<>();
 
     // Данные поиска
@@ -67,8 +85,8 @@ public class SearchGuiScreen extends Screen {
         double windowScale = MinecraftClient.getInstance().getWindow().getScaleFactor();
         double targetScaleFactor = 2.0 / windowScale;
 
-        // Ограничиваем scaleFactor чтобы GUI влезало в экран (с запасом 10%)
-        double maxScaleX = (width * 0.9) / BASE_WIDTH;
+        // Ограничиваем scaleFactor чтобы GUI вместе с боковой панелью влезало в экран (с запасом 10%)
+        double maxScaleX = (width * 0.9) / BASE_TOTAL_WIDTH;
         double maxScaleY = (height * 0.9) / BASE_HEIGHT;
         this.scaleFactor = Math.min(targetScaleFactor, Math.min(maxScaleX, maxScaleY));
 
@@ -78,8 +96,9 @@ public class SearchGuiScreen extends Screen {
         this.scaledItemHeight = (int) (BASE_ITEM_HEIGHT * scaleFactor);
         this.scaledSearchHeight = (int) (BASE_SEARCH_HEIGHT * scaleFactor);
 
-        // Позиция GUI по центру (на экране)
-        this.scaledX = (width - scaledWidth) / 2;
+        // Позиция GUI: центрируем основную+боковую панели вместе.
+        int totalScaledWidth = (int) (BASE_TOTAL_WIDTH * scaleFactor);
+        this.scaledX = (width - totalScaledWidth) / 2;
         this.scaledY = (height - scaledHeight) / 2;
 
         // Базовые координаты (в масштабированной системе координат)
@@ -112,10 +131,73 @@ public class SearchGuiScreen extends Screen {
                     baseY + buttonYOffset + (i * BASE_ITEM_HEIGHT),
                     BASE_WIDTH - 8,
                     BASE_ITEM_HEIGHT - 4,
-                    this::onItemSelected
+                    this::onItemSelected,
+                    api.getFavoritesManager(),
+                    this::updateItemButtons,
+                    this::pinItem
             );
             itemButtons.add(button);
         }
+
+        ModConfig cfg = ModConfig.get();
+        int baseScreenWidth = (int) (width / scaleFactor);
+        int baseScreenHeight = (int) (height / scaleFactor);
+
+        // Закреплённые предметы — внизу экрана, если включены.
+        if (cfg.showPinnedSlots) {
+            int pinnedX = (baseScreenWidth - BASE_PINNED_WIDTH) / 2;
+            int pinnedY = baseScreenHeight - BASE_PINNED_HEIGHT - BASE_PINNED_BOTTOM_MARGIN;
+            pinnedSlots = new PinnedSlotsWidget(
+                    pinnedX, pinnedY, BASE_PINNED_WIDTH, BASE_PINNED_HEIGHT,
+                    api.getPinnedSlotsManager(),
+                    api::findByName,
+                    this::sendChat
+            );
+        } else {
+            pinnedSlots = null;
+        }
+
+        // Боковая панель сортировки + (опц.) история. Если history скрыта,
+        // панель сжимается до Sort-секции.
+        int sortHeight = cfg.showHistory ? BASE_HEIGHT : SortPanelWidget.minHeight();
+        sortPanel = new SortPanelWidget(
+                baseX + BASE_WIDTH + BASE_PANEL_GAP,
+                baseY,
+                BASE_SORT_PANEL_WIDTH,
+                sortHeight,
+                cfg.showHistory,
+                this::updateItemButtons,
+                api.getHistoryManager(),
+                api::findByName,
+                this::sendChat
+        );
+
+        // Подсказка по управлению — верхний левый угол экрана.
+        if (cfg.showInstructions) {
+            int instW = InstructionsWidget.width(MinecraftClient.getInstance());
+            int instH = InstructionsWidget.height();
+            instructions = new InstructionsWidget(8, 8, instW, instH);
+        } else {
+            instructions = null;
+        }
+    }
+
+    /** ПКМ по результату поиска — закрепляем в первый свободный слот. */
+    private void pinItem(WynnItem item) {
+        if (item == null) return;
+        api.getPinnedSlotsManager().add(item.getNameToChat());
+    }
+
+    /** Отправляет произвольный текст в чат, добавляет его в историю и закрывает GUI. */
+    private void sendChat(String text) {
+        if (text == null || text.isBlank()) return;
+        shouldCancel = false;
+        api.getHistoryManager().add(text);
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player != null) {
+            client.player.networkHandler.sendChatMessage(text);
+        }
+        close();
     }
 
     private void onSearchTextChanged(String text) {
@@ -148,30 +230,31 @@ public class SearchGuiScreen extends Screen {
     }
 
     private void updateItemButtons() {
-        for (int i = 0; i < itemButtons.size() && i < currentResults.size(); i++) {
-            itemButtons.get(i).setItem(currentResults.get(i));
+        // Сортируем по алфавиту с учётом выбранного направления; избранные всегда сверху.
+        var favorites = api.getFavoritesManager();
+        Comparator<WynnItem> byName = Comparator.comparing(
+                WynnItem::getName, String.CASE_INSENSITIVE_ORDER);
+        if (sortPanel != null && sortPanel.isDescending()) {
+            byName = byName.reversed();
+        }
+        Comparator<WynnItem> favFirst = Comparator.comparing(
+                (WynnItem it) -> !favorites.isFavorite(it.getName()));
+        List<WynnItem> sorted = new ArrayList<>(currentResults);
+        sorted.sort(favFirst.thenComparing(byName));
+
+        for (int i = 0; i < itemButtons.size() && i < sorted.size(); i++) {
+            itemButtons.get(i).setItem(sorted.get(i));
         }
 
         // Очищаем остальные кнопки
-        for (int i = currentResults.size(); i < itemButtons.size(); i++) {
+        for (int i = sorted.size(); i < itemButtons.size(); i++) {
             itemButtons.get(i).setItem(null);
         }
     }
 
     private void onItemSelected(WynnItem item) {
         if (item == null) return;
-
-        shouldCancel = false;
-        String itemName = item.getNameToChat();
-
-        if (!itemName.isEmpty()) {
-            MinecraftClient client = MinecraftClient.getInstance();
-            if (client.player != null) {
-                client.player.networkHandler.sendChatMessage(itemName);
-            }
-        }
-
-        close();
+        sendChat(item.getNameToChat());
     }
 
     @Override
@@ -214,6 +297,21 @@ public class SearchGuiScreen extends Screen {
 
         // Рендер поля поиска поверх кнопок
         searchBox.draw(context, scaledMouseX, scaledMouseY, delta);
+
+        // Боковая панель сортировки
+        if (sortPanel != null) {
+            sortPanel.draw(context, scaledMouseX, scaledMouseY, delta);
+        }
+
+        // Закреплённые предметы — внизу экрана.
+        if (pinnedSlots != null) {
+            pinnedSlots.draw(context, scaledMouseX, scaledMouseY, delta);
+        }
+
+        // Подсказка по управлению.
+        if (instructions != null) {
+            instructions.draw(context, scaledMouseX, scaledMouseY, delta);
+        }
 
         // Статус загрузки
         drawStatusText(context, baseX, baseY);
@@ -259,6 +357,16 @@ public class SearchGuiScreen extends Screen {
             return true;
         }
 
+        // Боковая панель сортировки
+        if (sortPanel != null && sortPanel.mouseClicked(scaledMouseX, scaledMouseY, button)) {
+            return true;
+        }
+
+        // Закреплённые предметы внизу
+        if (pinnedSlots != null && pinnedSlots.mouseClicked(scaledMouseX, scaledMouseY, button)) {
+            return true;
+        }
+
         // Затем обработка кнопок предметов
         for (ItemButtonWidget btn : itemButtons) {
             if (btn.mouseClicked(scaledMouseX, scaledMouseY, button)) {
@@ -279,12 +387,7 @@ public class SearchGuiScreen extends Screen {
         if ((keyCode == 257 || keyCode == 335) && !searchBox.isEmpty()) {
             String text = searchBox.getText();
             if (!text.isEmpty()) {
-                shouldCancel = false;
-                MinecraftClient client = MinecraftClient.getInstance();
-                if (client.player != null) {
-                    client.player.networkHandler.sendChatMessage(text);
-                }
-                close();
+                sendChat(text);
                 return true;
             }
         }

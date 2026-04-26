@@ -1,95 +1,71 @@
-# Wynn Market Search
+# WynnMarketSearch
 
-**Wynncraft mod with enhanced market search**
+A Fabric mod that replaces Wynncraft's market chat search with a fast searchable GUI.
 
-![WynnMarketSearch GUI](https://i.imgur.com/1muxM4V.png)
+[Русский](README.ru.md)
 
-## Description
+![GUI](img/gui.png)
 
-This modification is designed specifically for the **Wynncraft** server and significantly simplifies the process of searching for goods on the in-game market. Thanks to the improved interface and expanded search functions, you will be able to find items faster and make profitable purchases.
+## What it does
 
-## Features
+When the market asks `Type the item name or type 'cancel' to cancel:`, the mod
+opens a search panel instead. Items load from a self-hosted backend that
+refreshes the Wynncraft database daily, so no API key is shipped to clients.
 
-- 🎯 **Auto-open** — Search GUI opens automatically when market message appears
-- 🔍 **Smart search** — Instant item search by name with partial match support
-- 🎨 **Color coding** — Items displayed with colors according to their rarity
-- 📦 **Item icons** — All items have their icons with custom Wynncraft textures
-- ⚡ **Async loading** — Data loads from API without game lag
-- 📱 **Adaptive interface** — GUI looks the same at any gui scale value
+## Controls
 
-## Rarity Colors
+| Action | Effect |
+|---|---|
+| **LMB** on item | send name to chat |
+| **RMB** on item | pin to bottom slot |
+| **MMB** on item | toggle favorite (★ marker, floats to top) |
+| **LMB** on slot / history row | re-send to chat |
+| **RMB** on slot / history row | remove |
+| **Enter** | send typed text as-is |
+| **ESC** | cancel |
 
-| Rarity | Color |
-|--------|-------|
-| Normal | Gray |
-| Unique | Yellow |
-| Rare | Light Purple |
-| Legendary | Aqua |
-| Fabled | Red |
-| Mythic | Dark Purple |
-| Set | Green |
+The right side panel sorts results A→Z / Z→A; the bottom strip holds up to 18
+pinned items, and history keeps the last 20 sent queries.
 
-## Installation
+## Install
 
-1. Install **Fabric Loader** for Minecraft 1.21.11
-2. Download the mod and place the `.jar` file in the `mods` folder
-3. Install dependencies:
+1. Fabric Loader for **Minecraft 1.21.11**
+2. Drop the `.jar` plus dependencies into `mods/`:
    - [Fabric API](https://modrinth.com/mod/fabric-api)
    - [Cloth Config](https://modrinth.com/mod/cloth-config)
-   - [Mod Menu](https://modrinth.com/mod/modmenu) (optional, for settings)
+   - [Mod Menu](https://modrinth.com/mod/modmenu) (optional, exposes the settings)
 
-## Settings
+## Settings (Mod Menu → WynnMarketSearch)
 
-Settings available via **Mod Menu** → **WynnMarketSearch**:
+| Option | What |
+|---|---|
+| Enable Market Search | open GUI on the chat trigger |
+| Auto-focus Search Box | focus the input on open |
+| Item Database API URL | override to self-host |
+| Show History Panel | toggle history list |
+| Show Pinned Slots | toggle bottom strip |
+| Show Instructions Box | toggle the help corner |
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| Market Search | Enable search when message appears | ✅ |
-| Auto Focus | Auto-focus search field when GUI opens | ✅ |
+## Commands
 
-## Usage
+- `/wms` — open the GUI manually
+- `/wms add <name>` — add a personal custom item
+- `/wms del <name>` — remove one
+- `/wms list` — list personal customs
+- `/wms reload` — force a fresh fetch from the backend (bypasses local cache)
 
-1. Open the market on Wynncraft server
-2. Click on an item to sell
-3. When the message `Type the item name or type 'cancel' to cancel:` appears, the mod will automatically open the search GUI
-4. Start typing the item name
-5. Select the desired item from the list by clicking or press Enter to send the first result
-6. To cancel, type `cancel` or close the GUI with ESC
-
-## Requirements
-
-- **Minecraft**: 1.21.11
-- **Fabric Loader**: ≥ 0.18.4
-- **Java**: 21+
-
-## Dependencies
-
-- [Fabric API](https://modrinth.com/mod/fabric-api)
-- [Cloth Config](https://modrinth.com/mod/cloth-config)
-- [Mod Menu](https://modrinth.com/mod/modmenu) (optional)
-
-## Building
+## Build
 
 ```bash
-# Clone repository
-git clone https://github.com/a0g/WynnMarketSearch.git
-cd WynnMarketSearch
-
-# Build
-./gradlew build
-
-# Run client for testing
-./gradlew runClient
+./gradlew build       # → build/libs/wms-*.jar
+./gradlew runClient   # dev client
 ```
-
-The compiled `.jar` file will be in `build/libs/`.
 
 ## License
 
-[CC0 1.0 Universal](LICENSE) — Public Domain
+[CC0 1.0](LICENSE) — Public Domain.
 
 ## Links
 
-- [Source Code](https://github.com/a0gzy/WynnMarketSearch)
-- [Wynncraft API](https://api.wynncraft.com/v3/item/database?fullResult)
-- [Report a Bug](https://github.com/a0gzy/WynnMarketSearch/issues)
+- [Source](https://github.com/a0gzy/WynnMarketSearch)
+- [Issues](https://github.com/a0gzy/WynnMarketSearch/issues)

@@ -68,13 +68,15 @@ newAPI.json
 # wiki / референсы
 wiki/
 
-# screenshots
-img/
+# screenshots — игнорим все png/jpg, кроме скриншотов в img/
 *.png
 *.jpg
 *.jpeg
 *.gif
 *.bmp
+!img/*.png
+!img/*.jpg
+!src/main/resources/assets/wms/icon.png
 
 # old (старая версия мода)
 old/

@@ -1,0 +1,15 @@
+{
+  "text.autoconfig.wms.option.marketSearch": "Поиск на рынке",
+  "text.autoconfig.wms.option.marketSearch.@Tooltip": "Открывать GUI поиска при появлении сообщения поиска",
+  "text.autoconfig.wms.option.autoFocus": "Автофокус поля ввода",
+  "text.autoconfig.wms.option.autoFocus.@Tooltip": "Автоматически фокусировать поле ввода при открытии GUI",
+  "text.autoconfig.wms.option.apiUrl": "URL API базы предметов",
+  "text.autoconfig.wms.option.apiUrl.@Tooltip": "Бэкенд, отдающий slim-базу Wynncraft. Можно указать свой для self-host.",
+  "text.autoconfig.wms.option.showHistory": "Показывать историю",
+  "text.autoconfig.wms.option.showHistory.@Tooltip": "Показывать список истории поиска в правой боковой панели",
+  "text.autoconfig.wms.option.showPinnedSlots": "Показывать слоты",
+  "text.autoconfig.wms.option.showPinnedSlots.@Tooltip": "Показывать полосу закреплённых предметов внизу экрана",
+  "text.autoconfig.wms.option.showInstructions": "Показывать подсказку",
+  "text.autoconfig.wms.option.showInstructions.@Tooltip": "Показывать коробочку с подсказкой по управлению в верхнем левом углу",
+  "text.autoconfig.wms.title": "Настройки WynnMarketSearch"
+}

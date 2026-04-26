@@ -54,6 +54,7 @@ public class WynnItem {
             case "legendary" -> Formatting.AQUA;
             case "fabled" -> Formatting.RED;
             case "mythic" -> Formatting.DARK_PURPLE;
+            case "custom" -> Formatting.DARK_AQUA; //а как в getRarityColorValue
             default -> Formatting.GRAY;
         };
     }
@@ -67,6 +68,7 @@ public class WynnItem {
             case RED -> 0xFF5555;
             case DARK_PURPLE -> 0xAA00AA;
             case GRAY -> 0xAAAAAA;
+            case DARK_AQUA -> 0x00FFFF;
             default -> 0xFFFFFF;
         };
     }

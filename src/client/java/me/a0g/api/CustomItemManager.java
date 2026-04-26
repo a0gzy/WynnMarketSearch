@@ -21,14 +21,6 @@ public class CustomItemManager {
 
     private final Path configDir;
     private final Map<String, String> customItems = new LinkedHashMap<>();
-    private final List<DefaultItem> DEFAULT_ITEMS = List.of(
-        new DefaultItem("Corkian Insulator", "minecraft:stick"),
-        new DefaultItem("Corkian Amplifier I", "minecraft:book"),
-        new DefaultItem("Corkian Amplifier II", "minecraft:book"),
-        new DefaultItem("Corkian Amplifier III", "minecraft:book"),
-        new DefaultItem("Corkian Amplifier IV", "minecraft:book"),
-        new DefaultItem("Corkian Simulator", "minecraft:copper_ingot")
-    );
 
     public CustomItemManager() {
         this.configDir = MinecraftClient.getInstance().runDirectory.toPath().resolve("wms");
@@ -42,40 +34,17 @@ public class CustomItemManager {
         try {
             Path filePath = configDir.resolve(CUSTOM_ITEMS_FILENAME);
             if (!Files.exists(filePath)) {
-                Wms.LOGGER.info("Custom items file not found, initializing defaults");
-                initDefaultItems();
+                // Дефолты больше не сидим — общие пресеты раздаёт сайт через /api/items.
                 return;
             }
-
             String json = Files.readString(filePath);
-            Wms.LOGGER.info("Loading custom items from: {}", json);
             Map<String, String> loaded = GSON.fromJson(json, new TypeToken<Map<String, String>>() {}.getType());
-
             if (loaded != null) {
                 customItems.clear();
                 customItems.putAll(loaded);
-                Wms.LOGGER.info("Loaded {} custom items", customItems.size());
-            } else {
-                Wms.LOGGER.warn("Custom items file is empty or invalid, initializing defaults");
-                initDefaultItems();
             }
         } catch (Exception e) {
             Wms.LOGGER.error("Failed to load custom items", e);
-        }
-    }
-
-    /**
-     * Инициализация дефолтных предметов
-     */
-    private void initDefaultItems() {
-        customItems.clear();
-        for (DefaultItem item : DEFAULT_ITEMS) {
-            customItems.put(item.name(), item.icon());
-        }
-        saveCustomItems();
-        Wms.LOGGER.info("Initialized {} default custom items", DEFAULT_ITEMS.size());
-        for (DefaultItem item : DEFAULT_ITEMS) {
-            Wms.LOGGER.debug("  - {}", item.name());
         }
     }
 
@@ -208,8 +177,4 @@ public class CustomItemManager {
         return items;
     }
 
-    /**
-     * Default item record
-     */
-    private record DefaultItem(String name, String icon) {}
 }

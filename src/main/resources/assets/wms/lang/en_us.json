@@ -5,5 +5,11 @@
   "text.autoconfig.wms.option.autoFocus.@Tooltip": "Automatically focus search box when GUI opens",
   "text.autoconfig.wms.option.apiUrl": "Item Database API URL",
   "text.autoconfig.wms.option.apiUrl.@Tooltip": "Backend that serves the slim Wynncraft item database. Override to self-host.",
+  "text.autoconfig.wms.option.showHistory": "Show History Panel",
+  "text.autoconfig.wms.option.showHistory.@Tooltip": "Show the search-history list in the right side panel",
+  "text.autoconfig.wms.option.showPinnedSlots": "Show Pinned Slots",
+  "text.autoconfig.wms.option.showPinnedSlots.@Tooltip": "Show the pinned-items strip at the bottom of the screen",
+  "text.autoconfig.wms.option.showInstructions": "Show Instructions Box",
+  "text.autoconfig.wms.option.showInstructions.@Tooltip": "Show the usage hints box in the top-left corner",
   "text.autoconfig.wms.title": "WynnMarketSearch Config"
 }
